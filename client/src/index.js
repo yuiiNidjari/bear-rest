@@ -1,21 +1,31 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+var express = require('express'); 
+var app = express(); 
+var router = express.Router(); 
+var bodyParser = require('body-parser'); 
+var cors = require('cors');
+  
+var bears = [
+    { id: '1', name: 'Yui' },
+    { id: '2', name: 'Yoo' }
+]; 
+  
+router.route('/bears') 
+    .get(function(req, res) {
+        res.send(bears);
+    })
+    .post(function(req, res) { 
+        var bear = {}; 
+        bear.name = req.body.name; 
+        bears.push(bear); 
+        res.json({ message: 'Bear created!' }); 
+    })
+router.route('/bears/:id')
+    .delete(function(req, res){
+        bears = bears.filter(b => b.id !== req.params.id)
+        res.json({ message: 'Bear deleted!' }); 
+    }) 
 
-import { createStore, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
-import { Provider } from 'react-redux';
-import reducers from './reducer';
-import { fetchBear } from './action';
-
-const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
-
-let store = createStoreWithMiddleware(reducers)
-store.dispatch(fetchBear());
-
-ReactDOM.render(
-    <Provider store={store}>
-        <App />
-    </Provider>
-, document.getElementById('root'));
+app.use(cors());
+// all of our routes will be prefixed with /api 
+app.use('/api', bodyParser.json(), router); 
+app.listen(8000);
